@@ -1,3 +1,4 @@
+
 # app.py
 import streamlit as st
 from groq import Groq
@@ -7,9 +8,16 @@ st.set_page_config(page_title="AI Content Assistant", page_icon="✍️", layout
 st.title("✍️ AI Content Assistant")
 st.write("Generate tailored posts, captions, and hashtags instantly using Groq.")
 
-st.sidebar.header("Configuration")
-api_key = st.sidebar.text_input("Groq API Key", type="password")
-st.sidebar.markdown("[Get a free Groq API key](https://console.groq.com)")
+# Safely attempt to fetch from Streamlit secrets without crashing if unconfigured
+try:
+    api_key = st.secrets.get("GROQ_API_KEY", "")
+except Exception:
+    api_key = ""
+
+if not api_key:
+    st.sidebar.header("Configuration")
+    api_key = st.sidebar.text_input("Groq API Key", type="password")
+    st.sidebar.markdown("[Get a free Groq API key](https://console.groq.com)")
 
 with st.form("content_form"):
     col1, col2 = st.columns(2)
@@ -26,7 +34,7 @@ with st.form("content_form"):
 
 if submitted:
     if not api_key:
-        st.error("Please enter your Groq API Key in the sidebar.")
+        st.error("Please provide your Groq API Key via Streamlit Secrets or the sidebar.")
     elif not topic:
         st.error("Please enter a topic.")
     else:
